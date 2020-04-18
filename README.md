@@ -19,12 +19,14 @@ version.
 
 ## Images
 ### Apache Airflow
-Used the great image [I'm an inline-style link](https://github.com/puckel/docker-airflow)
+Used the great image [Link](https://github.com/puckel/docker-airflow)
 I added networkx and docker for python that are required for running the Docker operator and for creating an automated
 SubDag from the dbt graph with networkx.
 
 ### dbt
 Mainly build it with the latested Python slim images from the Docker Hub.
+There are two Dockerfile one is for building the dev container to develop dbt transformations directly in the Docker
+container. The other one is the main image that gets pulled from Apache Airflow with the Docker Operator.
 
 ### Postgres
 I used 2 containers with different purposes. One is the application database for Apache Airflow the other one is used as
