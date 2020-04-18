@@ -1,0 +1,16 @@
+crazy:
+    target: dev
+    outputs:
+      dev:
+        type: postgres
+        host: localhost
+        user: postgres
+        pass: secret123
+        port: 5429
+        dbname: CORE
+        schema: BASE
+        threads: 4
+        keepalives_idle: 0 # default 0, indicating the system default
+        # search_path: [optional, override the default postgres search_path]
+        # role: [optional, set the role dbt assumes when executing queries]
+        # sslmode: [optional, set the sslmode used to connect to the database]

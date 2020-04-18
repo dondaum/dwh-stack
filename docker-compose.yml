@@ -1,0 +1,73 @@
+version: "3"
+services:
+  dwh:
+    image: "postgres"
+    container_name: "pg-dwh"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret123
+      POSTGRES_DB: CORE
+    # connects port 5432 inside Docker as port 54320 on the host machine
+    ports:
+      - "5429:5432"
+    volumes:
+      - pg-dwh-data:/var/lib/postgresql/data
+  dbt:
+    image: "owndbt"
+    container_name: "dbt-service"
+    command: tail -F anything
+    volumes:
+      - $PWD/dbt-stack/crazy:/dbt
+      - $PWD/secrets/dbt/profiles.yml:/root/.dbt/profiles.yml
+    network_mode: host
+    depends_on:
+      - dwh
+
+  # airflow setup
+  airflowpostgres:
+    image: postgres:9.6
+    container_name: "pg-airflow-dbt"
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    # volumes:
+    #   - pg-airflow-data:/var/lib/postgresql/data
+    ports:
+      - 5427:5432
+    logging:
+        options:
+            max-size: 10m
+            max-file: "3"
+
+  airflow-webserver:
+      image: dbt-docker-airflow:latest
+      # restart: always
+      depends_on:
+          - airflowpostgres
+      environment:
+          - LOAD_EX=n
+          - EXECUTOR=Local
+      logging:
+          options:
+              max-size: 10m
+              max-file: "3"
+      volumes:
+          - $PWD/airflow/docker-airflow/dags:/usr/local/airflow/dags
+          - /var/run/docker.sock:/var/run/docker.sock
+          - $PWD/dbt-stack/crazy/target/graph.gpickle:/usr/local/airflow/graph.gpickle
+          # - ./plugins:/usr/local/airflow/plugins
+      ports:
+          - "8080:8080"
+      command: webserver
+      healthcheck:
+          test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
+          interval: 30s
+          timeout: 30s
+          retries: 3
+
+volumes:
+  pg-dwh-data:
+
+
+# https://github.com/Shawe82/airflow-tutorial

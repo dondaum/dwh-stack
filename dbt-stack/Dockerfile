@@ -1,0 +1,26 @@
+FROM python:3.7-slim
+
+# Update and install system packages
+RUN apt-get update -y && \
+  apt-get install --no-install-recommends -y -q \
+  git libpq-dev python-dev && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Install DBT
+RUN pip install -U pip
+RUN pip install --upgrade dbt
+
+# Set environment variables
+ENV DBT_DIR /dbt
+
+# COPY ./ $DBT_DIR
+
+# Set working directory
+# The WORKDIR instruction sets the working directory for any RUN, CMD, ENTRYPOINT, 
+# COPY and ADD instructions that follow it in the Dockerfile. If the WORKDIR doesn’t 
+# exist, it will be created even if it’s not used in any subsequent Dockerfile instruction.
+WORKDIR $DBT_DIR
+
+# Run dbt
+CMD ["dbt"]
